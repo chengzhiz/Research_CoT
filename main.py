@@ -2,7 +2,7 @@ import time
 import threading
 from sensors import user_interaction_detected
 from chatgpt_interface import ask_chatgpt
-from output_devices import control_led, play_wav_file, stop_playback
+from output_devices import control_led, play_wav_file, stop_playback, wait_for_playback_to_finish
 from voice_recognition import recognize_speech_from_mic
 
 
@@ -63,15 +63,13 @@ def main():
                         pass
                     try:
                         categories = {
-                            "Personal and Contextual Insight": "Chatbots don’t know your personal details that they’re not told (and don’t understand human experience), don’t rely on it for personal advice.",
-                            "Emotions and Relationships": "Chatbots don’t understand emotions or relationships, they don’t have empathy even they pretend they have.",
-                            "Personal Opinions and Preferences": "Chatbots might pretend to have personal opinions but they don’t, so take their opinions with a second thought.",
-                            "Predicting the Future": "Chatbots can’t accurately predict future events. They stick to known facts.",
-                            "Medical or Legal Advice": "Chatbots aren’t suitable for health or legal advice. Consult a professional in these fields.",
-                            "Sensory and Perceptual Limitations": "Chatbots work only with text and can’t interpret physical sensations like smells, tastes, and touch.",
-                            "Artistic and Literary Interpretation": "Chatbots lack personal insight, so they can’t interpret art or literature with emotional depth.",
-                            "General Knowledge and Fact-Checking": "Chatbots excel at general knowledge and fact-checking in areas like history, science, and technology.",
-                            "Identity and Personhood": "Chatbots are not human. They don’t have identities, genders, or personalities."
+                            "1. Personal and Contextual Insight": " Chatbots do not know your personal details that they are not told, and do not understand real-life human experience; take the advice they provide with skepticism.",
+                            "2. Emotions and Relationships": " Chatbots can not experience human emotions or relationships; Be skeptical when chatting about human relationships, as they could pretend to have simulated empathy.",
+                            "3. Identity and Personhood": "Chatbots can roleplay different identities or personalities, but these are computational. So do not form strong emotional attachments to them.",
+                            "4. Predicting the Future": "Chatbots can not accurately predict future events. Their predictions are not always right, so treat chatbots’ predictions with skepticism.",
+                            "5. Medical and Legal Advice": "Chatbots’ health or legal advice is for reference only. Consult a qualified professional in these fields, especially in high-risk scenarios.",
+                            "6. Sensory and Perceptual Limitations": "Chatbots operate on fewer senses than humans do. They can not interpret physical sensations like smells, tastes, and touch. Be cautious about their advice on topics where sensory experience is critical.",
+                            "7. General Knowledge and Fact-Checking": "Chatbots can share general knowledge in areas like history, science, and technology, but sometimes they can go wrong or make things up. Please double-check for important facts."        
                         }
                         #terminal_ui.append_text('Justification: ' + categories['category_name'] + '\n')
                         terminal_ui.append_text('Justification: ' + response['justification'] + '\n')
@@ -79,6 +77,13 @@ def main():
                         # do nothing
                         pass
                     play_wav_file(answer)
+                    wait_for_playback_to_finish()
+                    try:
+                        category_name = response['category_name']
+                        category_sound = category_name[0] + ".wav"
+                        play_wav_file(category_sound)
+                    except KeyError:
+                        pass
                 time.sleep(10)  # Add a small delay to avoid rapid looping
                 last_was_else = False
             else:

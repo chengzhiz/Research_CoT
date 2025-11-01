@@ -106,3 +106,9 @@ def stop_playback():
     print("Stopping playback...")
     global is_playing
     is_playing = False
+
+def wait_for_playback_to_finish():
+    """Wait until the current WAV file playback is finished."""
+    global is_playing
+    while is_playing:
+        time.sleep(0.1)
