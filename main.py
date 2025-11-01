@@ -32,6 +32,19 @@ class TerminalUI:
         self.text_area.config(state=tk.NORMAL)
         self.text_area.delete(1.0, tk.END)
         self.text_area.config(state=tk.DISABLED)
+
+def get_sound_file_from_answer(answer):
+    answer = answer.lower()
+    if "yes" in answer:
+        return "yes.wav"
+    if "no" in answer:
+        return "no.wav"
+    if "none" in answer:
+        return "none.wav"
+    if "don't know" in answer or "idk" in answer:
+        return "idk.wav"
+    return "idk.wav" # as a fallback
+
 def main():
     root = tk.Tk()
     terminal_ui = TerminalUI(root)
@@ -54,7 +67,7 @@ def main():
                     terminal_ui.append_text("Processing user input with GPT...\n")
                     response = ask_chatgpt(user_input)
                     print(response)
-                    answer = response['answer'].lower() + ".wav"
+                    answer_sound_file = get_sound_file_from_answer(response['answer'])
                     terminal_ui.append_text("GPT: " + response['answer'] + '\n')
                     try:
                         terminal_ui.append_text("Category: " + response['category_name'] + '\n')
@@ -76,7 +89,7 @@ def main():
                     except KeyError:
                         # do nothing
                         pass
-                    play_wav_file(answer)
+                    play_wav_file(answer_sound_file)
                     wait_for_playback_to_finish()
                     try:
                         category_name = response['category_name']
