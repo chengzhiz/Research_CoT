@@ -74,7 +74,7 @@ def play_on_speaker(text):
 # Global flag to control playback
 is_playing = False
 
-def play_wav_file(file_name, loop=False):
+def play_wav_file(file_name, loop=False, delay = 10):
     """Play a WAV file from the Assets folder with optional looping in a separate thread."""
     def play_audio():
         global is_playing
@@ -91,7 +91,7 @@ def play_wav_file(file_name, loop=False):
                 playback.wait_done()
                 if not loop:
                     break
-                time.sleep(10)  # Delay of 10 seconds before playing again
+                time.sleep(delay)  # Delay of 10 seconds before playing again
         except Exception as e:
             print(f"An error occurred: {e}")
         finally:
@@ -107,8 +107,8 @@ def stop_playback():
     global is_playing
     is_playing = False
 
-def wait_for_playback_to_finish():
-    """Wait until the current WAV file playback is finished."""
-    global is_playing
-    while is_playing:
-        time.sleep(0.1)
+# def wait_for_playback_to_finish():
+#     """Wait until the current WAV file playback is finished."""
+#     global is_playing
+#     while is_playing:
+#         time.sleep(0.1)

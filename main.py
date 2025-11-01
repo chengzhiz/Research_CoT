@@ -89,12 +89,12 @@ def main():
                     except KeyError:
                         # do nothing
                         pass
-                    play_wav_file(answer_sound_file)
-                    wait_for_playback_to_finish()
+                    play_wav_file(answer_sound_file,delay = 1)
+                    # wait_for_playback_to_finish()
                     try:
                         category_name = response['category_name']
                         category_sound = category_name[0] + ".wav"
-                        play_wav_file(category_sound)
+                        play_wav_file(category_sound,delay = 1)
                     except KeyError:
                         pass
                 time.sleep(10)  # Add a small delay to avoid rapid looping
@@ -106,7 +106,7 @@ def main():
                     control_led("breathing")  # Revert to breathing light if no user interaction is detected.
                     stop_playback()  # Stop any ongoing playback
                     # Play loop sound to attract attention
-                    play_wav_file("intro.wav", loop=True)
+                    play_wav_file("intro.wav", loop=True,delay = 10)
 
                 if not last_was_else:
                     threading.Thread(target=else_run, daemon=True).start()
