@@ -2,7 +2,7 @@ import time
 import threading
 from sensors import user_interaction_detected
 from chatgpt_interface import ask_chatgpt
-from output_devices import control_led, play_wav_file, stop_playback, wait_for_playback_to_finish
+from output_devices import control_led, play_wav_file, stop_playback
 from voice_recognition import recognize_speech_from_mic
 
 
