@@ -73,11 +73,12 @@ def play_on_speaker(text):
 
 # Global flag to control playback
 is_playing = False
+audio_controllers = {}
 
 def play_wav_file(file_name, loop=False, delay = 10):
     """Play a WAV file from the Assets folder with optional looping in a separate thread."""
     def play_audio():
-        global is_playing
+        audio_controllers[file_name] = True
         try:
             # Construct the full file path
             file_path = os.path.join('Assets', file_name)
@@ -85,8 +86,7 @@ def play_wav_file(file_name, loop=False, delay = 10):
             audio = AudioSegment.from_wav(file_path)
 
             # Play the audio
-            is_playing = True
-            while is_playing:
+            while audio_controllers.get(file_name, False):
                 playback = _play_with_simpleaudio(audio)
                 playback.wait_done()
                 if not loop:
@@ -95,7 +95,8 @@ def play_wav_file(file_name, loop=False, delay = 10):
         except Exception as e:
             print(f"An error occurred: {e}")
         finally:
-            is_playing = False
+            if file_name in audio_controllers:
+                del audio_controllers[file_name]
 
     # Start the audio playback in a separate thread
     threading.Thread(target=play_audio, daemon=True).start()
@@ -107,8 +108,8 @@ def stop_playback():
     global is_playing
     is_playing = False
 
-# def wait_for_playback_to_finish():
-#     """Wait until the current WAV file playback is finished."""
-#     global is_playing
-#     while is_playing:
-#         time.sleep(0.1)
+def wait_for_playback_to_finish():
+    """Wait until the current WAV file playback is finished."""
+    global is_playing
+    while is_playing:
+        time.sleep(0.1)
