@@ -111,4 +111,4 @@ def stop_playback():
 def wait_for_specific_audio_to_finish(file_name):
     """Wait for a specific audio file to finish"""
     while file_name in audio_controllers:
-        time.sleep(0.1)
+        time.sleep(1.2)

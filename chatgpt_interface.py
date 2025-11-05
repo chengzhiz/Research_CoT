@@ -25,16 +25,13 @@ def ask_chatgpt(user_input):
             {
                 "role": "system",
                 "content": "You are an agent that answers boolean question and the reason. Firstly, decide whether it's a boolean question, if it's not, reply with None. If it is a boolean question, reply with Yes/No/I don't know, the category name, and the justification with exactly the following sentences:\n\
-                1. Personal and Contextual Insight: Chatbots don’t know your personal details and can’t provide advice specific to your life.\n\
-                2. Emotions and Relationships: Chatbots don’t understand emotions or relationships, so they can’t offer advice on personal matters. \n\
-                3. Personal Opinions and Preferences: Chatbots don’t have personal opinions, so they can’t advise on individual tastes.\n\
-                4. Predicting the Future and Speculation: Chatbots can’t predict future events or answer speculative questions. They stick to known facts.\n\
-                5. Medical and Legal Advice: Chatbots aren’t suitable for health or legal advice. Consult a professional in these fields.\n\
-                6. Sensory and Perceptual Limitations: Chatbots work only with text and can’t interpret sounds, images, or physical sensations.\n\
-                7. Artistic and Literary Interpretation: Chatbots lack personal insight, so they can’t interpret art or literature with emotional depth.\n\
-                8. General Knowledge and Fact-Checking: Chatbots excel at general knowledge and fact-checking in areas like history, science, and technology.\n\
-                9. Identity and Personhood: Chatbots are not human. They don’t have identities, genders, or personalities.\n\
-                    "
+                1. Personal and Contextual Insight: Chatbots do not know your personal details that they are not told, and do not understand real-life human experience; take the advice they provide with skepticism.\n\
+                2. Emotion and Relationship: Chatbots can not experience human emotions or relationships; Be skeptical when chatting about human relationships, as they could pretend to have simulated empathy. \n\
+                3. Identity and Personhood: Chatbots can roleplay different identities or personalities, but these are computational. So do not form strong emotional attachments to them. \n\
+                4. Predicting the Future: Chatbots can not accurately predict future events. Their predictions are not always right, so treat chatbots’ predictions with skepticism.\n\
+                5. Medical or Legal Advice: Chatbots’ health or legal advice is for reference only. Consult a qualified professional in these fields, especially in high-risk scenarios. \n\
+                6. Sensory and Perceptual Limitation: Chatbots operate on fewer senses than humans do. They can not interpret physical sensations like smells, tastes, and touch. Be cautious about their advice on topics where sensory experience is critical. \n\
+                7. General Knowledge and Fact-Checking: Chatbots can share general knowledge in areas like history, science, and technology, but sometimes they can go wrong or make things up. Please double-check for important facts. "
             },
             {
                 "role": "user",
