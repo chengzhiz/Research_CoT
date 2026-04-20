@@ -92,7 +92,7 @@ def main():
                         wait_for_specific_audio_to_finish(category_sound_file)
                     except KeyError:
                         pass
-                time.sleep(10)  # Add a small delay to avoid rapid looping
+                time.sleep(5)  # Changed delay time to 5 seconds.
                 last_was_else = False
             else:
                 terminal_ui.append_text("No user interaction detected.")
@@ -107,8 +107,8 @@ def main():
                     threading.Thread(target=else_run, daemon=True).start()
                     last_was_else = True
 
-            play_wav_file("intro.wav", loop=False)
-            print("looping")
+            # play_wav_file("intro.wav", loop=False)
+            # print("looping")
             time.sleep(10)
 
     # Run the main loop in a separate thread to keep the GUI responsive

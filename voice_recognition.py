@@ -13,7 +13,7 @@ def recognize_speech_from_mic():
         print("Listening for your command...")
 
         try:
-            audio = recognizer.listen(source)
+            audio = recognizer.listen(source) # now it has a 0.8 second default period
             #  audio = recognizer.listen(source, phrase_time_limit=5)  # Set time limit to stop after silence
 
             # Recognize speech using Google Web Speech API

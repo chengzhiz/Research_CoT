@@ -21,94 +21,110 @@ strip = PixelStrip(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRI
 # Initialize the library (must be called once before using the LED strip)
 strip.begin()
 
+# Global flags and controllers
+is_breathing = False
+audio_controllers = {}
+active_playbacks = []
+
 def control_led(mode):
     """Control LED strip for different modes like 'off', 'breathing', 'on', etc."""
     global is_breathing
     if mode == "breathing":
         print("Breathing light activated")
-        is_breathing = True
-        breathing_light(strip)
+        if not is_breathing:
+            is_breathing = True
+            # Run breathing in a separate thread so it doesn't block main.py
+            threading.Thread(target=breathing_light, args=(strip,), daemon=True).start()
     elif mode == "off":
         print("LED turned off")
         is_breathing = False
-        set_strip_brightness(strip, 0)  # Turn off all LEDs
+        set_strip_brightness(strip, 0)
     elif mode == "on":
         print("LED turned on")
         is_breathing = False
-        set_strip_brightness(strip, LED_BRIGHTNESS)  # Turn on all LEDs to maximum brightness
+        set_strip_brightness(strip, LED_BRIGHTNESS)
 
 def breathing_light(strip, wait_ms=50, max_brightness=255):
-    """Create a more visible breathing light effect by smoothly changing LED brightness."""
+    """Create a breathing light effect that can be stopped via the is_breathing flag."""
+    global is_breathing
     try:
-        # Gradually increase and decrease the brightness in a breathing pattern
-        while True:
+        while is_breathing:
             # Gradually increase brightness
             for brightness in range(0, max_brightness + 1, 10):
+                if not is_breathing: break
                 set_strip_brightness(strip, brightness)
                 time.sleep(wait_ms / 1000.0)
 
             # Gradually decrease brightness
             for brightness in range(max_brightness, -1, -10):
+                if not is_breathing: break
                 set_strip_brightness(strip, brightness)
                 time.sleep(wait_ms / 1000.0)
-
-    except KeyboardInterrupt:
-        # Stop and turn off LEDs when exiting the loop
+    finally:
         set_strip_brightness(strip, 0)
 
 def set_strip_brightness(strip, brightness):
     """Set the brightness of the entire strip to a single color (e.g., white)."""
-    color = Color(brightness, brightness, brightness)  # Grayscale color based on brightness
+    color = Color(brightness, brightness, brightness)
     for i in range(strip.numPixels()):
         strip.setPixelColor(i, color)
     strip.show()
+
 def display_on_tv(text):
     """Display text on the TV screen."""
-    os.system(f"echo '{text}' > /dev/tty1")  # Replace with the appropriate command to display on your TV setup
+    os.system(f"echo '{text}' > /dev/tty1")
 
 def play_on_speaker(text):
     """Convert text to speech and play it through the speaker."""
-    os.system(f'espeak "{text}"')  # You can replace 'espeak' with another TTS library if needed.
+    os.system(f'espeak "{text}"')
 
 
-# Global flag to control playback
-is_playing = False
-audio_controllers = {}
-
-def play_wav_file(file_name, loop=False, delay = 10):
-    """Play a WAV file from the Assets folder with optional looping in a separate thread."""
+def play_wav_file(file_name, loop=False, delay=10):
+    """Play a WAV file with explicit tracking of the playback object for immediate stopping."""
     def play_audio():
         audio_controllers[file_name] = True
         try:
-            # Construct the full file path
             file_path = os.path.join('Assets', file_name)
-            # Load the WAV file
+            if not os.path.exists(file_path):
+                print(f"Error: File {file_path} not found.")
+                return
+
             audio = AudioSegment.from_wav(file_path)
 
-            # Play the audio
             while audio_controllers.get(file_name, False):
                 playback = _play_with_simpleaudio(audio)
+                active_playbacks.append(playback)
+
+                # wait_done() blocks this thread, but we can now stop 'playback' from elsewhere
                 playback.wait_done()
-                if not loop:
+
+                if playback in active_playbacks:
+                    active_playbacks.remove(playback)
+
+                if not loop or not audio_controllers.get(file_name, False):
                     break
-                time.sleep(delay)  # Delay of 10 seconds before playing again
+                time.sleep(delay)
         except Exception as e:
-            print(f"An error occurred: {e}")
+            print(f"Playback error: {e}")
         finally:
             if file_name in audio_controllers:
                 del audio_controllers[file_name]
 
-    # Start the audio playback in a separate thread
     threading.Thread(target=play_audio, daemon=True).start()
     print(f"Playing {file_name}...")
 
 def stop_playback():
-    """Stop the playback of the WAV file."""
+    """Immediately stop all active audio playback."""
     print("Stopping playback...")
-    global is_playing
-    is_playing = False
+    audio_controllers.clear() # Prevent loops from restarting
+    for playback in list(active_playbacks):
+        try:
+            playback.stop() # Kill the current sound
+        except:
+            pass
+    active_playbacks.clear()
 
 def wait_for_specific_audio_to_finish(file_name):
     """Wait for a specific audio file to finish"""
     while file_name in audio_controllers:
-        time.sleep(1.2)
+        time.sleep(0.5)
