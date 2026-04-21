@@ -55,6 +55,7 @@ def main():
         last_was_else = False
         while True:
             if user_interaction_detected():
+                print("Button pressed detected!")
                 #clear the terminal all the past text, all clean
                 terminal_ui.clear_text()
                 terminal_ui.append_text("Please ask a yes-or-no question, I'm listening...\n")
@@ -92,8 +93,8 @@ def main():
                         wait_for_specific_audio_to_finish(category_sound_file)
                     except KeyError:
                         pass
-                time.sleep(5)  # Changed delay time to 5 seconds.
                 last_was_else = False
+                time.sleep(5)  # Cooldown before listening for the next interaction.
             else:
                 terminal_ui.append_text("No user interaction detected.")
                 # make the remain part into thread from control led to play wav file
@@ -107,9 +108,7 @@ def main():
                     threading.Thread(target=else_run, daemon=True).start()
                     last_was_else = True
 
-            # play_wav_file("intro.wav", loop=False)
-            # print("looping")
-            time.sleep(10)
+            time.sleep(0.05)  # Tight poll — checks button every 50ms for responsiveness.
 
     # Run the main loop in a separate thread to keep the GUI responsive
     threading.Thread(target=run, daemon=True).start()

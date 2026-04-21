@@ -95,8 +95,13 @@ def play_wav_file(file_name, loop=False, delay=10):
                 playback = _play_with_simpleaudio(audio)
                 active_playbacks.append(playback)
 
-                # wait_done() blocks this thread, but we can now stop 'playback' from elsewhere
-                playback.wait_done()
+                # Poll instead of blocking on wait_done(), so stop_playback()
+                # can interrupt within 50ms when the button is pressed.
+                while playback.is_playing():
+                    if not audio_controllers.get(file_name, False):
+                        playback.stop()
+                        break
+                    time.sleep(0.05)
 
                 if playback in active_playbacks:
                     active_playbacks.remove(playback)

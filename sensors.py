@@ -10,6 +10,9 @@ GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Important: add pull
 print("Waiting for button to be ready...")
 
 def user_interaction_detected():
-    """Detect if button is pressed."""
+    """Detect if button is pressed (with debounce)."""
     print("Checking for user interaction...")
-    return GPIO.input(BUTTON_PIN) == GPIO.LOW  # LOW means pressed (with pull-up)
+    if GPIO.input(BUTTON_PIN) == GPIO.LOW:  # LOW means pressed (with pull-up)
+        time.sleep(0.03)  # Wait 30ms debounce window
+        return GPIO.input(BUTTON_PIN) == GPIO.LOW  # Confirm still pressed
+    return False
