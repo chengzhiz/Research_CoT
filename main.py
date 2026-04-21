@@ -108,7 +108,7 @@ def main():
                     threading.Thread(target=else_run, daemon=True).start()
                     last_was_else = True
 
-            time.sleep(0.05)  # Tight poll — checks button every 50ms for responsiveness.
+            time.sleep(1)  # Tight poll — checks button every 50ms for responsiveness.
 
     # Run the main loop in a separate thread to keep the GUI responsive
     threading.Thread(target=run, daemon=True).start()
