@@ -107,9 +107,7 @@ def main():
                     threading.Thread(target=else_run, daemon=True).start()
                     last_was_else = True
 
-            play_wav_file("intro.wav", loop=False)
-            print("looping")
-            time.sleep(10)
+            time.sleep(0.5)
 
     # Run the main loop in a separate thread to keep the GUI responsive
     threading.Thread(target=run, daemon=True).start()
