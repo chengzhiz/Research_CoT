@@ -1,30 +1,35 @@
-# sensors.py
 import RPi.GPIO as GPIO
 import time
 
 # Button Pin
 BUTTON_PIN = 17
-# LED inside/next to button (lit when idle, off when pressed)
+# LED inside/next to button
 BUTTON_LED_PIN = 27
 
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Your working setup
 GPIO.setup(BUTTON_LED_PIN, GPIO.OUT)
 GPIO.output(BUTTON_LED_PIN, GPIO.HIGH)  # LED on at startup
 print("Waiting for button to be ready...")
 
 def user_interaction_detected():
     """Detect if button is pressed (with debounce).
-    PUD_DOWN + button to 3.3V: pressed=HIGH, released=LOW.
+    PUD_UP + button to GND: pressed=LOW, released=HIGH.
     LED is ON at rest, turns OFF when pressed.
     """
     raw = GPIO.input(BUTTON_PIN)
-    print(f"[DEBUG] GPIO pin {BUTTON_PIN} raw value: {raw} (1=HIGH/pressed, 0=LOW/rest)")
-    if raw == GPIO.HIGH:  # HIGH means pressed (button connects to 3.3V)
-        time.sleep(0.03)  # Wait 30ms debounce window
-        if GPIO.input(BUTTON_PIN) == GPIO.HIGH:  # Confirm still pressed
-            GPIO.output(BUTTON_LED_PIN, GPIO.LOW)   # Turn LED off
+    print(f"[DEBUG] GPIO pin {BUTTON_PIN} raw value: {raw} (1=HIGH/released, 0=LOW/pressed)")
+    
+    if raw == GPIO.LOW:  # LOW means pressed (button to GND)
+        GPIO.output(BUTTON_LED_PIN, GPIO.LOW)  # Turn LED OFF when pressed
+        time.sleep(0.03)  # Debounce window
+        if GPIO.input(BUTTON_PIN) == GPIO.LOW:  # Confirm still pressed
             return True
+        else:
+            # False alarm (bounce), turn LED back on
+            GPIO.output(BUTTON_LED_PIN, GPIO.HIGH)
     else:
-        GPIO.output(BUTTON_LED_PIN, GPIO.HIGH)      # LED on when not pressed
+        # Button released, LED should be on
+        GPIO.output(BUTTON_LED_PIN, GPIO.HIGH)
+    
     return False
