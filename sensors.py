@@ -1,35 +1,25 @@
 # sensors.py  — KEYBOARD MODE (spacebar replaces physical button)
 # Drop-in replacement for the GPIO version: same user_interaction_detected() API.
 # Switch back to the GPIO version when running on the Raspberry Pi.
+#
+# NOTE: pynput does NOT work when a Tkinter window owns keyboard focus.
+# Instead, main.py binds root.bind('<space>', ...) and calls trigger_interaction().
 
 import threading
-from pynput import keyboard
 
 # Internal flag: set to True whenever spacebar is pressed
 _space_pressed = False
-_listener_started = False
 _lock = threading.Lock()
 
-def _on_press(key):
-    """pynput callback — fires in its own thread."""
+print("[Sensor] Keyboard mode active — click the window and press SPACE to simulate button press.")
+
+
+def trigger_interaction():
+    """Called by Tkinter's spacebar binding in main.py to simulate a button press."""
     global _space_pressed
-    if key == keyboard.Key.space:
-        with _lock:
-            _space_pressed = True
-        print("[DEBUG] Spacebar pressed — simulating button press")
-
-def _start_listener():
-    """Start the background keyboard listener once."""
-    global _listener_started
-    if not _listener_started:
-        _listener_started = True
-        listener = keyboard.Listener(on_press=_on_press)
-        listener.daemon = True
-        listener.start()
-        print("[Sensor] Keyboard mode active — press SPACE to simulate button press.")
-
-# Auto-start listener when this module is imported
-_start_listener()
+    with _lock:
+        _space_pressed = True
+    print("[DEBUG] Spacebar pressed — simulating button press")
 
 
 def user_interaction_detected():

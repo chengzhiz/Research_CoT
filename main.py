@@ -1,6 +1,6 @@
 import time
 import threading
-from sensors import user_interaction_detected
+from sensors import user_interaction_detected, trigger_interaction
 from chatgpt_interface import ask_chatgpt
 from output_devices import control_led, play_wav_file, stop_playback, wait_for_specific_audio_to_finish
 from voice_recognition import recognize_speech_from_mic
@@ -109,6 +109,9 @@ def main():
                     last_was_else = True
 
             time.sleep(1)  # Tight poll — checks button every 50ms for responsiveness.
+
+    # Bind spacebar to simulate button press (keyboard testing mode)
+    root.bind('<space>', lambda event: trigger_interaction())
 
     # Run the main loop in a separate thread to keep the GUI responsive
     threading.Thread(target=run, daemon=True).start()
