@@ -1,35 +1,46 @@
-import RPi.GPIO as GPIO
-import time
+# sensors.py  — KEYBOARD MODE (spacebar replaces physical button)
+# Drop-in replacement for the GPIO version: same user_interaction_detected() API.
+# Switch back to the GPIO version when running on the Raspberry Pi.
 
-# Button Pin
-BUTTON_PIN = 17
-# LED inside/next to button
-BUTTON_LED_PIN = 27
+import threading
+from pynput import keyboard
 
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Your working setup
-GPIO.setup(BUTTON_LED_PIN, GPIO.OUT)
-GPIO.output(BUTTON_LED_PIN, GPIO.HIGH)  # LED on at startup
-print("Waiting for button to be ready...")
+# Internal flag: set to True whenever spacebar is pressed
+_space_pressed = False
+_listener_started = False
+_lock = threading.Lock()
+
+def _on_press(key):
+    """pynput callback — fires in its own thread."""
+    global _space_pressed
+    if key == keyboard.Key.space:
+        with _lock:
+            _space_pressed = True
+        print("[DEBUG] Spacebar pressed — simulating button press")
+
+def _start_listener():
+    """Start the background keyboard listener once."""
+    global _listener_started
+    if not _listener_started:
+        _listener_started = True
+        listener = keyboard.Listener(on_press=_on_press)
+        listener.daemon = True
+        listener.start()
+        print("[Sensor] Keyboard mode active — press SPACE to simulate button press.")
+
+# Auto-start listener when this module is imported
+_start_listener()
+
 
 def user_interaction_detected():
-    """Detect if button is pressed (with debounce).
-    PUD_UP + button to GND: pressed=LOW, released=HIGH.
-    LED is ON at rest, turns OFF when pressed.
+    """Return True once per spacebar press (clears the flag after reading).
+
+    Mirrors the one-shot debounce behaviour of the GPIO button version:
+    each press triggers exactly one interaction event.
     """
-    raw = GPIO.input(BUTTON_PIN)
-    print(f"[DEBUG] GPIO pin {BUTTON_PIN} raw value: {raw} (1=HIGH/released, 0=LOW/pressed)")
-    
-    if raw == GPIO.LOW:  # LOW means pressed (button to GND)
-        GPIO.output(BUTTON_LED_PIN, GPIO.LOW)  # Turn LED OFF when pressed
-        time.sleep(0.03)  # Debounce window
-        if GPIO.input(BUTTON_PIN) == GPIO.LOW:  # Confirm still pressed
+    global _space_pressed
+    with _lock:
+        if _space_pressed:
+            _space_pressed = False  # Consume the event
             return True
-        else:
-            # False alarm (bounce), turn LED back on
-            GPIO.output(BUTTON_LED_PIN, GPIO.HIGH)
-    else:
-        # Button released, LED should be on
-        GPIO.output(BUTTON_LED_PIN, GPIO.HIGH)
-    
     return False
